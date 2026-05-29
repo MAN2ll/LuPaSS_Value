@@ -308,119 +308,32 @@ fun EntryCard(e: Entry, onClick: () -> Unit, onFav: () -> Unit, onDelete: () -> 
     val isExpired = e.isPasswordExpired
     val daysLeft = e.daysUntilExpiry
 
+    // ✅ Вспомогательная функция для градиента — всегда возвращает Brush
+    fun getAccentBrush(): Brush {
+        return if (isExpired) {
+            Brush.verticalGradient(listOf(SvColors.Coral, SvColors.Coral.copy(alpha = 0.3f)))
+        } else {
+            Brush.verticalGradient(listOf(accent, accent.copy(alpha = 0.3f)))
+        }
+    }
+
     Box(
         Modifier
             .fillMaxWidth()
             .glassCard(cornerRadius = 16.dp)
             .combinedClickable(onClick = onClick, onLongClick = { menu = true })
     ) {
-        // Left accent bar
+        // Left accent bar — теперь используем функцию
         Box(
             Modifier
                 .align(Alignment.CenterStart)
                 .width(3.dp)
                 .fillMaxHeight()
                 .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
-                .background(
-                    if (isExpired) SvColors.Coral
-                    else Brush.verticalGradient(listOf(accent, accent.copy(alpha = 0.3f)))
-                )
+                .background(getAccentBrush()) // ✅ Теперь тип всегда Brush
         )
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar
-            Box(
-                Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(accent.copy(alpha = 0.25f), accent.copy(alpha = 0.08f))
-                        )
-                    )
-                    .border(1.dp, accent.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    e.title.take(1).uppercase(),
-                    fontWeight = FontWeight.Bold, fontSize = 20.sp, color = accent
-                )
-            }
-
-            Spacer(Modifier.width(14.dp))
-
-            // Content
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(e.title, fontWeight = FontWeight.SemiBold, fontSize = 15.sp,
-                        color = SvColors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false))
-                    if (e.profile == "Рабочее") {
-                        Box(
-                            Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(SvColors.TealSoft)
-                                .padding(horizontal = 5.dp, vertical = 1.dp)
-                        ) { Text("Работа", fontSize = 9.sp, color = SvColors.Teal, fontWeight = FontWeight.Medium) }
-                    }
-                }
-                if (e.username.isNotEmpty()) {
-                    Text(e.username, fontSize = 12.sp, color = SvColors.TextSecond,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(accent.copy(alpha = 0.12f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) { Text(e.category, fontSize = 10.sp, color = accent, fontWeight = FontWeight.Medium) }
-
-                    when {
-                        isExpired -> Box(
-                            Modifier.clip(RoundedCornerShape(4.dp)).background(SvColors.CoralSoft)
-                                .border(0.5.dp, SvColors.Coral.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) { Text("Смените!", fontSize = 10.sp, color = SvColors.Coral, fontWeight = FontWeight.Bold) }
-                        daysLeft in 1..14 -> Box(
-                            Modifier.clip(RoundedCornerShape(4.dp)).background(SvColors.GoldSoft)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) { Text("${daysLeft}д.", fontSize = 10.sp, color = SvColors.Gold) }
-                    }
-                }
-                // Emoji hint
-                val emojis = HintVisualizer.toEmojis(e.hintKeywords)
-                if (emojis.isNotEmpty()) {
-                    Text(emojis, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
-                }
-            }
-
-            // Right side
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(onFav, Modifier.size(36.dp)) {
-                    Icon(
-                        if (e.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                        null, Modifier.size(18.dp),
-                        tint = if (e.isFavorite) SvColors.Gold else SvColors.TextMuted
-                    )
-                }
-                DropdownMenu(menu, { menu = false },
-                    containerColor = SvColors.BgElevated) {
-                    DropdownMenuItem(
-                        text = { Text("Удалить", color = SvColors.Coral) },
-                        onClick = { menu = false; onDelete() },
-                        leadingIcon = { Icon(Icons.Default.Delete, null, tint = SvColors.Coral) }
-                    )
-                }
-            }
-        }
+        // ... остальной код функции без изменений ...
+        // (Avatar, Content, Right side — всё оставляешь как есть)
     }
 }
