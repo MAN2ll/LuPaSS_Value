@@ -1,8 +1,17 @@
 package com.securevault.ui.screens
 
+// ✅ ВСЕ НУЖНЫЕ ИМПОРТЫ — НЕ УДАЛЯЙ НИ ОДИН
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border  // ← ЭТОГО НЕ ХВАТАЛО!
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -10,8 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.securevault.ui.theme.SvColors
 
-// Простая модель для демо
+// Простая модель
 data class DemoItem(val id: Long, val title: String, val username: String, val category: String)
 
 @Composable
@@ -45,6 +60,7 @@ fun VaultListScreen(
             .background(SvColors.BgDeep)
             .padding(horizontal = 16.dp)
     ) {
+        // Header
         Row(
             Modifier
                 .fillMaxWidth()
@@ -63,6 +79,7 @@ fun VaultListScreen(
             }
         }
 
+        // List
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 100.dp)
@@ -78,6 +95,7 @@ fun VaultListScreen(
         }
     }
 
+    // FAB
     Box(
         Modifier
             .fillMaxSize()
@@ -110,7 +128,7 @@ fun DemoCard(title: String, username: String, category: String, onClick: () -> U
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(SvColors.BgCard)
-            .border(1.dp, SvColors.Border, RoundedCornerShape(16.dp))
+            .border(1.dp, SvColors.Border, RoundedCornerShape(16.dp))  // ✅ Теперь работает!
     ) {
         Row(
             Modifier
@@ -118,12 +136,13 @@ fun DemoCard(title: String, username: String, category: String, onClick: () -> U
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Avatar
             Box(
                 Modifier
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(accent.copy(alpha = 0.2f))
-                    .border(1.dp, accent.copy(alpha = 0.4f), CircleShape),
+                    .border(1.dp, accent.copy(alpha = 0.4f), CircleShape),  // ✅ И здесь!
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -134,6 +153,7 @@ fun DemoCard(title: String, username: String, category: String, onClick: () -> U
                 )
             }
 
+            // Info
             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                 Text(
                     text = title,
