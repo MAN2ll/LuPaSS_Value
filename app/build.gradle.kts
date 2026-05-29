@@ -50,7 +50,8 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.biometric)
-    implementation(libs.security.crypto)
+    // implementation(libs.security.crypto)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")  // ✅ Прямая ссылка — всегда работает
     implementation(libs.coroutines.android)
     debugImplementation(libs.compose.ui.tooling)
 // ✅ Прямая ссылка — гарантированно работает
