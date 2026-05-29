@@ -1,9 +1,12 @@
 package com.securevault.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
@@ -11,20 +14,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.securevault.ui.theme.SvColors
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Простая модель для демо (вместо Entry)
-// ═══════════════════════════════════════════════════════════════════════════
+// Простая модель для демо
 data class DemoItem(val id: Long, val title: String, val username: String, val category: String)
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Vault List Screen — упрощённая версия для сборки
-// ═══════════════════════════════════════════════════════════════════════════
 @Composable
 fun VaultListScreen(
     onAdd: () -> Unit,
@@ -32,7 +31,6 @@ fun VaultListScreen(
     onLock: () -> Unit,
     favOnly: Boolean = false
 ) {
-    // Демо-данные (вместо ViewModel)
     val demoItems = remember {
         listOf(
             DemoItem(1, "Google", "user@gmail.com", "email"),
@@ -47,7 +45,6 @@ fun VaultListScreen(
             .background(SvColors.BgDeep)
             .padding(horizontal = 16.dp)
     ) {
-        // Header
         Row(
             Modifier
                 .fillMaxWidth()
@@ -66,7 +63,6 @@ fun VaultListScreen(
             }
         }
 
-        // List
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 100.dp)
@@ -82,7 +78,6 @@ fun VaultListScreen(
         }
     }
 
-    // FAB
     Box(
         Modifier
             .fillMaxSize()
@@ -99,9 +94,6 @@ fun VaultListScreen(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Простая карточка (вместо EntryCard)
-// ═══════════════════════════════════════════════════════════════════════════
 @Composable
 fun DemoCard(title: String, username: String, category: String, onClick: () -> Unit) {
     val accent = when (category.lowercase()) {
@@ -116,7 +108,9 @@ fun DemoCard(title: String, username: String, category: String, onClick: () -> U
         colors = CardDefaults.cardColors(containerColor = SvColors.BgCard),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, SvColors.Border, androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(SvColors.BgCard)
+            .border(1.dp, SvColors.Border, RoundedCornerShape(16.dp))
     ) {
         Row(
             Modifier
@@ -124,12 +118,12 @@ fun DemoCard(title: String, username: String, category: String, onClick: () -> U
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
             Box(
                 Modifier
                     .size(40.dp)
-                    .background(accent.copy(alpha = 0.2f), androidx.compose.foundation.shape.CircleShape)
-                    .border(1.dp, accent.copy(alpha = 0.4f), androidx.compose.foundation.shape.CircleShape),
+                    .clip(CircleShape)
+                    .background(accent.copy(alpha = 0.2f))
+                    .border(1.dp, accent.copy(alpha = 0.4f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -140,7 +134,6 @@ fun DemoCard(title: String, username: String, category: String, onClick: () -> U
                 )
             }
 
-            // Info
             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                 Text(
                     text = title,
