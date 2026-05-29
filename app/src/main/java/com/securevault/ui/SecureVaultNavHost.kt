@@ -1,170 +1,160 @@
-package com.securevault.ui
+package com.securevault.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavType
-import androidx.navigation.compose.*
-import androidx.navigation.navArgument
-import com.securevault.ui.screens.*
 import com.securevault.ui.theme.SvColors
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Простая модель для демо
+// ═══════════════════════════════════════════════════════════════════════════
+data class DemoItem(val id: Long, val title: String, val username: String, val category: String)
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Vault List Screen — минимальная рабочая версия
+// ═══════════════════════════════════════════════════════════════════════════
 @Composable
-fun SecureVaultNavHost() {
-    val root = rememberNavController()
-    NavHost(root, startDestination = "splash") {
-        composable("splash") {
-            SplashScreen(onFinished = {
-                root.navigate("lock") { popUpTo("splash") { inclusive = true } }
-            })
-        }
-        composable("lock") {
-            LockScreen(
-                onUnlocked = { root.navigate("main") { popUpTo("lock") { inclusive = true } } },
-                onBiometricRequest = {}
+fun VaultListScreen(
+    onAdd: () -> Unit,
+    onEdit: (Long) -> Unit,
+    onLock: () -> Unit,
+    favOnly: Boolean = false
+) {
+    val demoItems = remember {
+        listOf(
+            DemoItem(1, "Google", "user@gmail.com", "email"),
+            DemoItem(2, "Telegram", "@username", "social"),
+            DemoItem(3, "Банк", "1234****", "bank")
+        )
+    }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(SvColors.BgDeep)
+            .padding(horizontal = 16.dp)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (favOnly) "★ Избранное" else "🔐 Все записи",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = SvColors.TextPrimary
             )
+            IconButton(onClick = onLock) {
+                Icon(Icons.Default.Lock, "Заблокировать", tint = SvColors.TextMuted)
+            }
         }
-        composable("main") {
-            MainShell(onLock = { root.navigate("lock") { popUpTo("main") { inclusive = true } } })
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 100.dp)
+        ) {
+            items(demoItems, key = { it.id }) { item ->
+                DemoCard(
+                    title = item.title,
+                    username = item.username,
+                    category = item.category,
+                    onClick = { onEdit(item.id) }
+                )
+            }
+        }
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        FloatingActionButton(
+            onClick = onAdd,
+            containerColor = SvColors.Blue,
+            contentColor = Color.White
+        ) {
+            Icon(Icons.Default.Add, "Добавить")
         }
     }
 }
 
-private data class NavTab(val route: String, val label: String, val icon: ImageVector)
-
+// ═══════════════════════════════════════════════════════════════════════════
+// Простая карточка
+// ═══════════════════════════════════════════════════════════════════════════
 @Composable
-fun MainShell(onLock: () -> Unit) {
-    val tabs = listOf(
-        NavTab("passwords", "Пароли", Icons.Default.VpnKey),
-        NavTab("favorites", "Избранное", Icons.Default.Star),
-        NavTab("settings", "Настройки", Icons.Default.Settings)
-    )
-    val nav = rememberNavController()
-    val back by nav.currentBackStackEntryAsState()
-    val cur = back?.destination?.route?.substringBefore("?")
+fun DemoCard(title: String, username: String, category: String, onClick: () -> Unit) {
+    val accent = when (category.lowercase()) {
+        "social" -> SvColors.Purple
+        "bank" -> SvColors.Gold
+        "email" -> SvColors.Teal
+        else -> SvColors.Blue
+    }
 
-    Scaffold(
-        containerColor = SvColors.BgDeep,
-        bottomBar = {
+    Card(
+        onClick = onClick,
+        colors = CardDefaults.cardColors(containerColor = SvColors.BgCard),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(SvColors.BgCard)
+            .border(1.dp, SvColors.Border, RoundedCornerShape(16.dp))  // ✅ Теперь импорт есть!
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color.Transparent, SvColors.BgDeep.copy(alpha = 0.95f))
-                        )
-                    )
-                    .navigationBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(accent.copy(alpha = 0.2f))
+                    .border(1.dp, accent.copy(alpha = 0.4f), CircleShape),  // ✅ И здесь
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(26.dp))
-                        .background(SvColors.BgElevated)
-                        .border(1.dp, SvColors.Border, RoundedCornerShape(26.dp))
-                        .padding(vertical = 6.dp, horizontal = 6.dp)
-                ) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        tabs.forEach { tab ->
-                            val selected = cur == tab.route || (tab.route == "passwords" && cur == null)
-                            SimpleNavItem(tab, selected) {
-                                nav.navigate(tab.route) {
-                                    popUpTo(nav.graph.startDestinationId) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    ) { pad ->
-        NavHost(nav, "passwords", Modifier.padding(pad)) {
-            composable("passwords") {
-                VaultListScreen(
-                    onAdd = { nav.navigate("entry") },
-                    onEdit = { nav.navigate("entry?id=$it") },
-                    onLock = onLock
+                Text(
+                    text = title.firstOrNull()?.uppercase() ?: "?",
+                    color = accent,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
             }
-            composable("favorites") {
-                VaultListScreen(
-                    onAdd = { nav.navigate("entry") },
-                    onEdit = { nav.navigate("entry?id=$it") },
-                    onLock = onLock,
-                    favOnly = true
-                )
-            }
-            composable("settings") { SettingsScreen(onResetDone = onLock) }
-            composable(
-                "entry?id={id}",
-                arguments = listOf(navArgument("id") { type = NavType.LongType; defaultValue = -1L })
-            ) { back ->
-                val rawId = back.arguments?.getLong("id") ?: -1L
-                EntryEditScreen(
-                    entryId = if (rawId == -1L) null else rawId,
-                    onBack = { nav.popBackStack() }
-                )
-            }
-        }
-    }
-}
 
-// ✅ ПРОСТАЯ КНОПКА НАВИГАЦИИ — БЕЗ RowScope И ДРУГИХ ПРОБЛЕМ
-@Composable
-private fun SimpleNavItem(tab: NavTab, selected: Boolean, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .then(
-                if (selected) Modifier
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                SvColors.Blue.copy(alpha = 0.22f),
-                                SvColors.Teal.copy(alpha = 0.08f)
-                            )
-                        )
-                    )
-                    .border(1.dp, SvColors.Blue.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                else Modifier
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Icon(
-            imageVector = tab.icon,
-            contentDescription = tab.label,
-            modifier = Modifier.size(21.dp),
-            tint = if (selected) SvColors.Blue else SvColors.TextMuted
-        )
-        Text(
-            text = tab.label,
-            fontSize = 11.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) SvColors.Blue else SvColors.TextMuted
-        )
+            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SvColors.TextPrimary
+                )
+                Text(
+                    text = username,
+                    fontSize = 13.sp,
+                    color = SvColors.TextSecond
+                )
+            }
+        }
     }
 }
