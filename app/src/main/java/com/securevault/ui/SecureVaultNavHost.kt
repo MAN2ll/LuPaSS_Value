@@ -2,6 +2,7 @@ package com.securevault.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,40 +28,31 @@ import com.securevault.ui.theme.SvColors
 fun SecureVaultNavHost() {
     val root = rememberNavController()
     NavHost(root, startDestination = "splash") {
-
-        // ── Splash ────────────────────────────────────────────────────
         composable("splash") {
-            SplashScreen(
-                onFinished = {
-                    root.navigate("lock") { popUpTo("splash") { inclusive = true } }
-                }
-            )
+            SplashScreen(onFinished = {
+                root.navigate("lock") { popUpTo("splash") { inclusive = true } }
+            })
         }
-
-        // ── Lock ──────────────────────────────────────────────────────
         composable("lock") {
             LockScreen(
-                onUnlocked        = { root.navigate("main") { popUpTo("lock") { inclusive = true } } },
+                onUnlocked = { root.navigate("main") { popUpTo("lock") { inclusive = true } } },
                 onBiometricRequest = {}
             )
         }
-
-        // ── Main shell with bottom nav ────────────────────────────────
         composable("main") {
             MainShell(onLock = { root.navigate("lock") { popUpTo("main") { inclusive = true } } })
         }
     }
 }
 
-// ── Nav tab descriptor ────────────────────────────────────────────────────────
 private data class NavTab(val route: String, val label: String, val icon: ImageVector)
 
 @Composable
 fun MainShell(onLock: () -> Unit) {
     val tabs = listOf(
-        NavTab("passwords", "Пароли",    Icons.Default.VpnKey),
+        NavTab("passwords", "Пароли", Icons.Default.VpnKey),
         NavTab("favorites", "Избранное", Icons.Default.Star),
-        NavTab("settings",  "Настройки", Icons.Default.Settings)
+        NavTab("settings", "Настройки", Icons.Default.Settings)
     )
     val nav = rememberNavController()
     val back by nav.currentBackStackEntryAsState()
@@ -69,7 +61,6 @@ fun MainShell(onLock: () -> Unit) {
     Scaffold(
         containerColor = SvColors.BgDeep,
         bottomBar = {
-            // Floating pill bottom nav
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -95,11 +86,11 @@ fun MainShell(onLock: () -> Unit) {
                     ) {
                         tabs.forEach { tab ->
                             val selected = cur == tab.route || (tab.route == "passwords" && cur == null)
-                            NavItem(tab, selected) {
+                            SimpleNavItem(tab, selected) {
                                 nav.navigate(tab.route) {
                                     popUpTo(nav.graph.startDestinationId) { saveState = true }
                                     launchSingleTop = true
-                                    restoreState    = true
+                                    restoreState = true
                                 }
                             }
                         }
@@ -111,14 +102,14 @@ fun MainShell(onLock: () -> Unit) {
         NavHost(nav, "passwords", Modifier.padding(pad)) {
             composable("passwords") {
                 VaultListScreen(
-                    onAdd  = { nav.navigate("entry") },
+                    onAdd = { nav.navigate("entry") },
                     onEdit = { nav.navigate("entry?id=$it") },
                     onLock = onLock
                 )
             }
             composable("favorites") {
                 VaultListScreen(
-                    onAdd  = { nav.navigate("entry") },
+                    onAdd = { nav.navigate("entry") },
                     onEdit = { nav.navigate("entry?id=$it") },
                     onLock = onLock,
                     favOnly = true
@@ -132,39 +123,48 @@ fun MainShell(onLock: () -> Unit) {
                 val rawId = back.arguments?.getLong("id") ?: -1L
                 EntryEditScreen(
                     entryId = if (rawId == -1L) null else rawId,
-                    onBack  = { nav.popBackStack() }
+                    onBack = { nav.popBackStack() }
                 )
             }
         }
     }
 }
 
+// ✅ ПРОСТАЯ КНОПКА НАВИГАЦИИ — БЕЗ RowScope И ДРУГИХ ПРОБЛЕМ
 @Composable
-private fun NavItem(tab: NavTab, selected: Boolean, onClick: () -> Unit) {
-    // ✅ Простая кнопка вместо NavigationBarItem — работает везде
-    androidx.compose.material3.TextButton(
-        onClick = onClick,
-        colors = androidx.compose.material3.TextButtonDefaults.textButtonColors(
-            contentColor = if (selected) SvColors.Blue else SvColors.TextMuted
-        )
+private fun SimpleNavItem(tab: NavTab, selected: Boolean, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .then(
+                if (selected) Modifier
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                SvColors.Blue.copy(alpha = 0.22f),
+                                SvColors.Teal.copy(alpha = 0.08f)
+                            )
+                        )
+                    )
+                    .border(1.dp, SvColors.Blue.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                else Modifier
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(vertical = 4.dp)
-        ) {
-            Icon(
-                imageVector = tab.icon,
-                contentDescription = tab.label,
-                modifier = Modifier.size(21.dp),
-                tint = if (selected) SvColors.Blue else SvColors.TextMuted
-            )
-            Text(
-                text = tab.label,
-                fontSize = 11.sp,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                color = if (selected) SvColors.Blue else SvColors.TextMuted
-            )
-        }
+        Icon(
+            imageVector = tab.icon,
+            contentDescription = tab.label,
+            modifier = Modifier.size(21.dp),
+            tint = if (selected) SvColors.Blue else SvColors.TextMuted
+        )
+        Text(
+            text = tab.label,
+            fontSize = 11.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (selected) SvColors.Blue else SvColors.TextMuted
+        )
     }
 }
