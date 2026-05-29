@@ -141,46 +141,30 @@ fun MainShell(onLock: () -> Unit) {
 
 @Composable
 private fun NavItem(tab: NavTab, selected: Boolean, onClick: () -> Unit) {
-    Box(
-        Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .then(
-                if (selected) Modifier
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                SvColors.Blue.copy(alpha = 0.22f),
-                                SvColors.Teal.copy(alpha = 0.08f)
-                            )
-                        )
-                    )
-                    .border(1.dp, SvColors.Blue.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                else Modifier
-            )
-    ) {
-        NavigationBarItem(
-            selected  = selected,
-            onClick   = onClick,
-            icon = {
-                Icon(
-                    tab.icon, tab.label,
-                    Modifier.size(21.dp),
-                    tint = if (selected) SvColors.Blue else SvColors.TextMuted
-                )
-            },
-            label = {
-                Text(
-                    tab.label,
-                    fontSize = 11.sp,
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (selected) SvColors.Blue else SvColors.TextMuted
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor   = SvColors.Blue,
-                unselectedIconColor = SvColors.TextMuted,
-                indicatorColor      = Color.Transparent
-            )
+    // ✅ Простая кнопка вместо NavigationBarItem — работает везде
+    androidx.compose.material3.TextButton(
+        onClick = onClick,
+        colors = androidx.compose.material3.TextButtonDefaults.textButtonColors(
+            contentColor = if (selected) SvColors.Blue else SvColors.TextMuted
         )
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(vertical = 4.dp)
+        ) {
+            Icon(
+                imageVector = tab.icon,
+                contentDescription = tab.label,
+                modifier = Modifier.size(21.dp),
+                tint = if (selected) SvColors.Blue else SvColors.TextMuted
+            )
+            Text(
+                text = tab.label,
+                fontSize = 11.sp,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (selected) SvColors.Blue else SvColors.TextMuted
+            )
+        }
     }
 }
