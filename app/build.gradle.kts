@@ -53,4 +53,6 @@ dependencies {
     implementation(libs.security.crypto)
     implementation(libs.coroutines.android)
     debugImplementation(libs.compose.ui.tooling)
+// ✅ Прямая ссылка — гарантированно работает
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }
